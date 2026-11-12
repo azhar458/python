@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="kk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Python тіліндегі рекурсия</title>
+    <style>
+        :root {
+            --bg: #f6f7ff;
+            --surface: #fff;
+            --ink: #1d2144;
+            --muted: #5b6087;
+            --blue: #2f5bea;
+            --violet: #7a4dde;
+            --line: #e0e3f5;
+            --ok: #15803d;
+            --okbg: #e7f7ec;
+            --bad: #b91c1c;
+            --badbg: #fdeaea;
+            --codebg: #171a38;
+            --codefg: #e8eaff
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 72px
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font: 17px/1.7 "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif
+        }
+
+        .wrap {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(255, 255, 255, .92);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--line)
+        }
+
+        .bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px
+        }
+
+        .logo {
+            font-weight: 700;
+            color: var(--blue);
+            text-decoration: none
+        }
+
+        nav ul {
+            display: flex;
+            gap: 6px;
+            list-style: none;
+            margin: 0;
+            padding: 0
+        }
+
+        nav a {
+            display: block;
+            padding: 8px 14px;
+            border-radius: 8px;
+            color: var(--ink);
+            text-decoration: none;
+            font-size: 15px
+        }
+
+        nav a:hover,
+        nav a:focus-visible {
+            background: #eceeff;
+            color: var(--blue)
+        }
+
+        #menuBtn {
+            display: none;
+            background: none;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 15px;
+            color: var(--ink);
+            cursor: pointer
+        }
+
+        a:focus-visible,
+        button:focus-visible {
+            outline: 3px solid var(--violet);
+            outline-offset: 2px
+        }
+
+        .hero {
+            padding: 72px 0 56px
+        }
+
+        .hero h1 {
+            font-size: clamp(34px, 6vw, 56px);
+            line-height: 1.15;
+            margin: 0 0 18px;
+            background: linear-gradient(90deg, var(--blue), var(--violet));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent
+        }
+
+        .hero p {
+            max-width: 640px;
+            color: var(--muted);
+            font-size: 19px;
+            margin: 0 0 26px
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 10px;
+            background: linear-gradient(90deg, var(--blue), var(--violet));
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600
+        }
+
+        .btn:hover {
+            filter: brightness(1.08)
+        }
+
+        .quote {
+            margin-top: 36px;
+            padding: 18px 22px;
+            border-left: 4px solid var(--violet);
+            background: var(--surface);
+            border-radius: 0 12px 12px 0;
+            color: var(--muted)
+        }
+
+        section {
+            padding: 48px 0
+        }
+
+        h2 {
+            font-size: clamp(26px, 4vw, 34px);
+            margin: 0 0 24px;
+            color: var(--ink)
+        }
+
+        h3 {
+            margin: 0 0 8px;
+            font-size: 20px;
+            color: var(--blue)
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 22px
+        }
+
+        .card p {
+            margin: 0;
+            color: var(--muted)
+        }
+
+        .card.wide {
+            grid-column: 1/-1
+        }
+
+        .ex {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 22px
+        }
+
+        .ex h3 {
+            color: var(--violet)
+        }
+
+        pre {
+            margin: 14px 0;
+            padding: 18px;
+            background: var(--codebg);
+            color: var(--codefg);
+            border-radius: 12px;
+            overflow-x: auto;
+            font: 15px/1.65 Consolas, "SF Mono", Menlo, monospace;
+            tab-size: 4
+        }
+
+        pre .k {
+            color: #8ab4ff
+        }
+
+        pre .s {
+            color: #a5e8b4
+        }
+
+        pre .c {
+            color: #8b90b8;
+            font-style: italic
+        }
+
+        pre .n {
+            color: #f2b8ff
+        }
+
+        pre .f {
+            color: #ffd98a
+        }
+
+        .out {
+            font: 14px/1.5 Consolas, monospace;
+            background: #eceeff;
+            color: var(--ink);
+            padding: 10px 14px;
+            border-radius: 8px;
+            white-space: pre-wrap
+        }
+
+        .ex p {
+            margin: 10px 0;
+            color: var(--muted)
+        }
+
+        .q {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 22px
+        }
+
+        .q h3 {
+            color: var(--ink);
+            font-size: 18px;
+            margin-bottom: 14px
+        }
+
+        .opt {
+            display: block;
+            width: 100%;
+            text-align: left;
+            font: inherit;
+            font-size: 16px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            background: var(--bg);
+            border: 2px solid var(--line);
+            border-radius: 10px;
+            color: var(--ink);
+            cursor: pointer;
+            transition: border-color .15s, background .15s
+        }
+
+        .opt:hover:not(:disabled) {
+            border-color: var(--violet)
+        }
+
+        .opt:disabled {
+            cursor: default
+        }
+
+        .opt.right {
+            border-color: var(--ok);
+            background: var(--okbg)
+        }
+
+        .opt.wrong {
+            border-color: var(--bad);
+            background: var(--badbg)
+        }
+
+        .fb {
+            display: none;
+            margin-top: 6px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-size: 16px
+        }
+
+        .fb.show {
+            display: block
+        }
+
+        .fb.ok {
+            background: var(--okbg);
+            color: #14532d
+        }
+
+        .fb.no {
+            background: var(--badbg);
+            color: #7f1d1d
+        }
+
+        .score {
+            font-weight: 600;
+            color: var(--blue);
+            margin-top: 8px
+        }
+
+        #reset {
+            display: none;
+            margin-top: 10px;
+            font: inherit;
+            border: 0;
+            cursor: pointer
+        }
+
+        .mt {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 22px
+        }
+
+        .vctl {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 18px
+        }
+
+        .vb {
+            font: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: 0;
+            cursor: pointer;
+            background: #eceeff;
+            color: var(--blue)
+        }
+
+        .vb.pri {
+            background: linear-gradient(90deg, var(--blue), var(--violet));
+            color: #fff
+        }
+
+        .vb:disabled {
+            opacity: .45;
+            cursor: default
+        }
+
+        .bx {
+            border-radius: 14px;
+            padding: 14px;
+            border: 2px solid var(--blue);
+            background: #eef1ff
+        }
+
+        .bx.alt {
+            border-color: var(--violet);
+            background: #f3ecff
+        }
+
+        .bx .lb {
+            font-weight: 600
+        }
+
+        .bx .in {
+            display: none;
+            margin-top: 12px
+        }
+
+        .bx.open>.in {
+            display: block;
+            animation: pop .3s
+        }
+
+        .bx.last.open {
+            border-color: var(--ok);
+            background: var(--okbg)
+        }
+
+        .vmsg {
+            margin-top: 16px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: #eceeff;
+            font-size: 16px
+        }
+
+        .cap {
+            font-size: 14px;
+            color: var(--muted);
+            margin: 10px 0 0
+        }
+
+        @keyframes pop {
+            from {
+                transform: translateY(-10px);
+                opacity: 0
+            }
+
+            to {
+                transform: none;
+                opacity: 1
+            }
+        }
+
+        footer {
+            padding: 32px 0;
+            text-align: center;
+            color: var(--muted);
+            border-top: 1px solid var(--line);
+            font-size: 15px
+        }
+
+        @media(max-width:720px) {
+            #menuBtn {
+                display: block
+            }
+
+            nav {
+                position: absolute;
+                top: 60px;
+                left: 0;
+                right: 0;
+                background: #fff;
+                border-bottom: 1px solid var(--line);
+                display: none
+            }
+
+            nav.open {
+                display: block
+            }
+
+            nav ul {
+                flex-direction: column;
+                padding: 8px 20px 14px
+            }
+
+            .grid {
+                grid-template-columns: 1fr
+            }
+
+            .hero {
+                padding: 44px 0 32px
+            }
+
+            body {
+                font-size: 16px
+            }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+            html {
+                scroll-behavior: auto
+            }
+
+            * {
+                transition: none !important
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="wrap bar">
+            <a class="logo" href="#home">Python · Рекурсия</a>
+            <button id="menuBtn" aria-expanded="false" aria-controls="menu">Мәзір</button>
+            <nav id="menu" aria-label="Негізгі мәзір">
+                <ul>
+                    <li><a href="#home">Басты бет</a></li>
+                    <li><a href="#theory">Теория</a></li>
+                    <li><a href="#examples">Мысалдар</a></li>
+                    <li><a href="#visual">Көрнекі</a></li>
+                    <li><a href="#practice">Тапсырмалар</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="wrap">
+
+        <section id="home" class="hero">
+            <h1>Python тіліндегі рекурсия</h1>
+            <p>Рекурсия — функцияның өзін-өзі шақыруы. Үлкен есепті сол есептің кішірек нұсқасына бөліп, қадам сайын
+                шешуге мүмкіндік беретін қуатты тәсіл.</p>
+            <a class="btn" href="#theory">Оқуды бастау</a>
+            <div class="quote">Қарапайым мысал: матрешка қуыршағын ашсаңыз, ішінен кішірек матрешка шығады. Ең кішісіне
+                жеткенше осылай жалғаса береді. Рекурсия да дәл солай жұмыс істейді.</div>
+        </section>
+
+        <section id="theory">
+            <h2>Теория</h2>
+            <div class="grid">
+                <div class="card wide">
+                    <h3>Рекурсия дегеніміз не?</h3>
+                    <p>Рекурсия — функция өз денесінің ішінде өзін шақыратын бағдарламалау тәсілі. Әр шақырған сайын
+                        есеп кішірейеді, соңында ең қарапайым жағдайға жетеді де, жауап кері қарай жинала бастайды.
+                        Рекурсия әсіресе есепті бір-біріне ұқсас кішкентай бөліктерге бөлуге болатын кезде ыңғайлы.</p>
+                </div>
+                <div class="card">
+                    <h3>Рекурсивті функция қалай жұмыс істейді?</h3>
+                    <p>Функция шақырылғанда Python оны «шақырулар стегіне» (call stack) қояды. Функция өзін қайта
+                        шақырса, жаңа шақыру стектің үстіне қосылады. Тоқтау шарты орындалғанда ең соңғы шақыру нәтиже
+                        қайтарады, содан кейін стек бірте-бірте босап, әр шақыру өз жауабын алады.</p>
+                </div>
+                <div class="card">
+                    <h3>Base Case (тоқтау шарты) дегеніміз не?</h3>
+                    <p>Base case — рекурсияны тоқтататын ең қарапайым жағдай. Мұнда функция өзін қайта шақырмай, дайын
+                        жауапты тікелей қайтарады. Мысалы, факториалда <code>n == 0</code> болса, жауап <code>1</code>.
+                        Тоқтау шарты болмаса, функция шексіз шақырыла береді.</p>
+                </div>
+                <div class="card wide">
+                    <h3>Recursive Call (рекурсивті шақыру) дегеніміз не?</h3>
+                    <p>Recursive call — функцияның өз денесінде өзін қайта шақыруы. Бұл шақыруда аргумент әрдайым тоқтау
+                        шартына жақындайтындай өзгереді, мысалы <code>n - 1</code>. Егер аргумент тоқтау шартына
+                        жақындамаса, рекурсия ешқашан аяқталмайды.</p>
+                </div>
+            </div>
+            <pre id="skeleton">def funksiya(n):
+    # 1) Base case: тоқтау шарты
+    if n == 0:
+        return 1
+    # 2) Recursive call: есепті кішірейтіп, өзін шақыру
+    return funksiya(n - 1)</pre>
+        </section>
+
+        <section id="examples">
+            <h2>Python мысалдары</h2>
+
+            <div class="ex">
+                <h3>1. Факториалды есептеу</h3>
+                <pre>def factorial(n):
+    # Base case: 0! = 1 және 1! = 1
+    if n == 0 or n == 1:
+        return 1
+    # Recursive call: n! = n * (n - 1)!
+    return n * factorial(n - 1)
+
+print(factorial(5))</pre>
+                <div class="out">120</div>
+                <p>Санның факториалы — 1-ден сол санға дейінгі барлық сандардың көбейтіндісі: 5! = 5 · 4 · 3 · 2 · 1 =
+                    120. Функция <code>factorial(5)</code> есебін <code>5 * factorial(4)</code> деп бөледі, ол әрі қарай
+                    <code>4 * factorial(3)</code> болады. Сөйтіп <code>factorial(1)</code>-ге жеткенде тоқтап, жауап
+                    кері қарай көбейтіліп жиналады.</p>
+            </div>
+
+            <div class="ex">
+                <h3>2. Фибоначчи сандары</h3>
+                <pre>def fibonacci(n):
+    # Base case: алғашқы екі сан
+    if n == 0:
+        return 0
+    if n == 1:
+        return 1
+    # Recursive call: алдыңғы екі санның қосындысы
+    return fibonacci(n - 1) + fibonacci(n - 2)
+
+for i in range(8):
+    print(fibonacci(i), end=" ")</pre>
+                <div class="out">0 1 1 2 3 5 8 13</div>
+                <p>Фибоначчи тізбегінде әр сан алдыңғы екі санның қосындысына тең: 0, 1, 1, 2, 3, 5, 8, 13... Бұл жерде
+                    екі тоқтау шарты бар (<code>n == 0</code> және <code>n == 1</code>) және функция өзін екі рет
+                    шақырады. Үлкен <code>n</code> үшін бұл тәсіл баяу жұмыс істейді, өйткені бір мәндер қайта-қайта
+                    есептеледі.</p>
+            </div>
+
+            <div class="ex">
+                <h3>3. Кері санау</h3>
+                <pre>def countdown(n):
+    # Base case: 0-ге жеткенде тоқтаймыз
+    if n == 0:
+        print("Старт!")
+        return
+    print(n)
+    # Recursive call: санды 1-ге азайтамыз
+    countdown(n - 1)
+
+countdown(5)</pre>
+                <div class="out">5
+                    4
+                    3
+                    2
+                    1
+                    Старт!</div>
+                <p>Функция алдымен ағымдағы санды басып шығарады, содан кейін өзін <code>n - 1</code> мәнімен шақырады.
+                    Сан 0 болғанда «Старт!» жазылып, рекурсия тоқтайды. Әр қадамда <code>n</code> кішірейіп, тоқтау
+                    шартына жақындай түседі.</p>
+            </div>
+        </section>
+
+        <section id="visual">
+            <h2>Көрнекі көрсету</h2>
+            <p>Матрешка қуыршағын елестетіңіз: қорапты ашсаңыз, ішінен кішірек қорап шығады. Ең кішісіне жеткенше осылай
+                жалғаса береді. Төмендегі түймені басып, қораптарды бір-бірлеп ашып көріңіз.</p>
+            <div class="mt">
+                <div class="vctl">
+                    <button class="vb pri" id="mtBtn" type="button">Қорапты ашу</button>
+                    <button class="vb" id="mtReset" type="button">Қайта бастау</button>
+                </div>
+                <div id="mtRoot"></div>
+                <div class="vmsg" id="mtMsg" aria-live="polite"></div>
+                <p class="cap">Қорапты ашу — рекурсивті шақыру. Ең кіші бос қорап — тоқтау шарты (base case).</p>
+            </div>
+        </section>
+
+        <section id="practice">
+            <h2>Практикалық тапсырмалар</h2>
+            <div id="quiz"></div>
+            <div class="score" id="score" aria-live="polite"></div>
+            <button class="btn" id="reset" type="button">Қайта бастау</button>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="wrap">Python тіліндегі рекурсия · Оқу материалы студенттерге арналған</div>
+    </footer>
+
+    <script>
+        // Мәзір (телефонға арналған)
+        const menuBtn = document.getElementById('menuBtn');
+        const menu = document.getElementById('menu');
+        menuBtn.addEventListener('click', () => {
+            const open = menu.classList.toggle('open');
+            menuBtn.setAttribute('aria-expanded', open);
+        });
+        menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+            menu.classList.remove('open');
+            menuBtn.setAttribute('aria-expanded', 'false');
+        }));
+
+        // Python кодын бояу
+        const KW = /^(def|if|elif|else|return|for|in|while|print|range|and|or|not)$/;
+        document.querySelectorAll('pre').forEach(pre => {
+            const src = pre.textContent;
+            const re = /(#.*)|("[^"\n]*")|(\b[A-Za-z_]\w*\b)(?=\()|(\b[A-Za-z_]\w*\b)|(\b\d+\b)|([\s\S])/g;
+            const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            let out = '', m, prevDef = false;
+            while ((m = re.exec(src))) {
+                if (m[1]) out += '<span class="c">' + esc(m[1]) + '</span>';
+                else if (m[2]) out += '<span class="s">' + esc(m[2]) + '</span>';
+                else if (m[3]) { out += KW.test(m[3]) ? '<span class="k">' + m[3] + '</span>' : '<span class="f">' + m[3] + '</span>'; }
+                else if (m[4]) { out += KW.test(m[4]) ? '<span class="k">' + m[4] + '</span>' : (prevDef ? '<span class="f">' + m[4] + '</span>' : m[4]); }
+                else if (m[5]) out += '<span class="n">' + m[5] + '</span>';
+                else out += esc(m[6]);
+                prevDef = m[4] === 'def';
+            }
+            pre.innerHTML = out;
+        });
+
+        // Матрешка (қораптар) визуализациясы
+        const mtRoot = document.getElementById('mtRoot'), mtMsg = document.getElementById('mtMsg');
+        const mtBtn = document.getElementById('mtBtn'), mtReset = document.getElementById('mtReset');
+        const MT_N = 5;
+        let mtBoxes = [], mtOpened = 0;
+
+        function mtMake(k) {
+            const b = document.createElement('div');
+            b.className = 'bx' + (k % 2 === 0 ? ' alt' : '') + (k === MT_N ? ' last' : '');
+            const l = document.createElement('div');
+            l.className = 'lb';
+            l.textContent = 'Қорап ' + k;
+            const inn = document.createElement('div');
+            inn.className = 'in';
+            if (k < MT_N) inn.appendChild(mtMake(k + 1));
+            else inn.textContent = 'Ішінде ештеңе жоқ.';
+            b.appendChild(l);
+            b.appendChild(inn);
+            mtBoxes.push(b);
+            return b;
+        }
+        function mtStart() {
+            mtBoxes = []; mtOpened = 0;
+            mtRoot.innerHTML = '';
+            mtRoot.appendChild(mtMake(1));
+            mtMsg.textContent = 'Бастау үшін «Қорапты ашу» түймесін басыңыз.';
+            mtBtn.disabled = false;
+        }
+        mtBtn.addEventListener('click', () => {
+            if (mtOpened >= MT_N) return;
+            mtBoxes[mtOpened].classList.add('open');
+            mtOpened++;
+            if (mtOpened < MT_N) {
+                mtMsg.textContent = mtOpened + '-қорап ашылды. Ішінде тағы қорап бар, ашуды жалғастырамыз.';
+            } else {
+                mtMsg.textContent = MT_N + '-қорап ашылды. Ішінде ештеңе жоқ, бұл — тоқтау шарты. Рекурсия тоқтады!';
+                mtBtn.disabled = true;
+            }
+        });
+        mtReset.addEventListener('click', mtStart);
+        mtStart();
+
+        // Тест
+        const questions = [
+            {
+                q: 'Рекурсивті функциядағы тоқтау шарты (base case) не үшін қажет?',
+                a: ['Функцияны мүмкіндігінше көп рет шақыру үшін', 'Рекурсияны тоқтатып, дайын жауапты қайтару үшін', 'Жаңа айнымалы жариялау үшін', 'Бағдарламаны әдейі қатемен аяқтау үшін'],
+                c: 1,
+                e: 'Тоқтау шарты функцияны қайта шақырмай, дайын жауапты тікелей қайтарады. Осы себепті рекурсия шексіз жалғаспай, белгілі бір сәтте аяқталады.'
+            },
+            {
+                q: 'factorial(4) функциясы қандай нәтиже қайтарады?',
+                a: ['10', '16', '24', '12'],
+                c: 2,
+                e: 'factorial(4) = 4 · factorial(3) = 4 · 3 · factorial(2) = 4 · 3 · 2 · factorial(1) = 4 · 3 · 2 · 1 = 24.'
+            },
+            {
+                q: 'Рекурсивті функцияда тоқтау шарты болмаса, Python-да не болады?',
+                a: ['Функция 0 қайтарады', 'Функция бос мән қайтарып, қалыпты аяқталады', 'Бағдарлама өздігінен дұрыс тоқтайды', 'Шақырулар тым көбейіп, RecursionError қатесі шығады'],
+                c: 3,
+                e: 'Тоқтау шарты жоқ болса, функция өзін шексіз шақыра береді. Python шақырулар санын шектейді (әдетте шамамен 1000), сондықтан шектен асқанда RecursionError қатесі шығады.'
+            }
+        ];
+
+        const quiz = document.getElementById('quiz');
+        const scoreEl = document.getElementById('score');
+        const resetBtn = document.getElementById('reset');
+        let score = 0, answered = 0;
+
+        function build() {
+            quiz.innerHTML = '';
+            score = 0; answered = 0;
+            scoreEl.textContent = '';
+            resetBtn.style.display = 'none';
+            questions.forEach((item, qi) => {
+                const box = document.createElement('div');
+                box.className = 'q';
+                const h = document.createElement('h3');
+                h.textContent = (qi + 1) + '-сұрақ. ' + item.q;
+                box.appendChild(h);
+                const fb = document.createElement('div');
+                fb.className = 'fb';
+                fb.setAttribute('role', 'status');
+                const btns = item.a.map((text, oi) => {
+                    const b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'opt';
+                    b.textContent = text;
+                    b.addEventListener('click', () => {
+                        btns.forEach(x => x.disabled = true);
+                        btns[item.c].classList.add('right');
+                        const ok = oi === item.c;
+                        if (ok) score++; else b.classList.add('wrong');
+                        fb.className = 'fb show ' + (ok ? 'ok' : 'no');
+                        fb.innerHTML = '';
+                        const strong = document.createElement('strong');
+                        strong.textContent = ok ? 'Дұрыс! ' : 'Қате. ';
+                        fb.appendChild(strong);
+                        fb.appendChild(document.createTextNode((ok ? '' : 'Дұрыс жауап: «' + item.a[item.c] + '». ') + item.e));
+                        answered++;
+                        if (answered === questions.length) {
+                            scoreEl.textContent = 'Нәтиже: ' + questions.length + ' сұрақтың ' + score + '-ына дұрыс жауап бердіңіз.';
+                            resetBtn.style.display = 'inline-block';
+                        }
+                    });
+                    box.appendChild(b);
+                    return b;
+                });
+                box.appendChild(fb);
+                quiz.appendChild(box);
+            });
+        }
+        resetBtn.addEventListener('click', () => { build(); document.getElementById('practice').scrollIntoView(); });
+        build();
+    </script>
+</body>
+
+</html>
